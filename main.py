@@ -12,6 +12,7 @@ board.setBoard(p1,p2)
 wQueen = tileMap['d1'].getPiece()
 bQueen = tileMap['d8'].getPiece()
 
+#TODO: make it so you cannt move a piece that wont fix check
 
 
 gameRunning = True

@@ -1,3 +1,4 @@
+import copy
 class Player():
     elo = None
     numMoves = 0
@@ -74,7 +75,7 @@ class Player():
     def updatePossibleMoves(self,board,piece):
         self.pieceMoves[piece] = piece.getPossibleMoves(board)
 
-    def getAllPossibleMoves(self):
+    def getAllPossibleMoves(self): #TODO: remove tiles with self team pieces
         res = set()
         for piece in self.pieceMoves:
             res = res | self.pieceMoves[piece]
@@ -88,6 +89,7 @@ class Player():
     def turn(self,board):
         finishedMove = self.numMoves+1
         while self.numMoves < finishedMove:
+            
             print("Enter The tile of the piece to move")
             start = input()
             print("Enter the tile of where to move the piece")
@@ -98,6 +100,20 @@ class Player():
             startTile = tileMap[start]
             endTile = tileMap[end]
             selectedPiece = startTile.getPiece()
+            
+            while self.isChecked == True: #TODO:test
+                #check if the move relieves check
+                #print(self.clearsCheck([startTile,endTile],selectedPiece,board))
+                if self.clearsCheck([startTile,endTile],selectedPiece,board) == True:
+                    self.isChecked = False
+                else:
+                    print("Illegal Move: must resolve check")
+                    print("Enter The tile of the piece to move")
+                    start = input()
+                    print("Enter the tile of where to move the piece")
+                    end = input()
+                    startTile = tileMap[start]
+                    endTile = tileMap[end]
             if selectedPiece.move(endTile,board): #return false on a bad or illegal move
                 piece = endTile.getPiece()
                 self.updatePossibleMoves(board,piece)
@@ -126,5 +142,37 @@ class Player():
             self.opponent.isChecked = True
         else:
             self.opponent.isChecked = False
+    def clearsCheck(self,move,selectedPiece,board):
+        start = move[0]
+        end = move[1]
+        originalRow = selectedPiece.getRow()
+        originalCol = selectedPiece.getColNumber()
+        #simluate the move
+        selectedPiece.setTile(end)
+        start.setPiece(None)
+        end.setPiece(selectedPiece)
+        opponentPossibleMovesPostMove = self.opponent.recalculateAllPossibleMoves(board)       
+        # print("king tile", self.king.getTile(), "|", self.king.getTile() in opponentPossibleMovesPostMove)
+        # for i in opponentPossibleMovesPostMove:#the set hold references to the tiles. so changing tile changes content of set
+        #     print("updated possible moves", i)
 
+        if self.king.getTile() not in opponentPossibleMovesPostMove:
+            #check resolved
+            validMove = True
+            selectedPiece.setTile(start)
+            start.setPiece(selectedPiece)
+            end.setPiece(None)
 
+        else:
+            #check not resolved
+            validMove = False
+            selectedPiece.setTile(start)
+            start.setPiece(selectedPiece)
+            end.setPiece(None)
+        return validMove
+
+    def recalculateAllPossibleMoves(self,board):
+        allMoves = set()
+        for piece in self.pieceMoves:
+            allMoves = allMoves | piece.getPossibleMoves(board)
+        return allMoves
