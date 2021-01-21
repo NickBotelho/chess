@@ -89,7 +89,10 @@ class Player():
     def turn(self,board):
         finishedMove = self.numMoves+1
         while self.numMoves < finishedMove:
-            
+            if self.isChecked == True:
+                print(self.isCheckmate(board))
+                if self.isCheckmate(board) == True:
+                    print("Checkmate")
             print("Enter The tile of the piece to move")
             start = input()
             print("Enter the tile of where to move the piece")
@@ -100,10 +103,10 @@ class Player():
             startTile = tileMap[start]
             endTile = tileMap[end]
             selectedPiece = startTile.getPiece()
-            
-            while self.isChecked == True: #TODO:test
+
+
+            while self.isChecked == True: #TODO:test (light testing worked)
                 #check if the move relieves check
-                #print(self.clearsCheck([startTile,endTile],selectedPiece,board))
                 if self.clearsCheck([startTile,endTile],selectedPiece,board) == True:
                     self.isChecked = False
                 else:
@@ -115,6 +118,7 @@ class Player():
                     startTile = tileMap[start]
                     endTile = tileMap[end]
             if selectedPiece.move(endTile,board): #return false on a bad or illegal move
+                #TODO:make sure the move made doesnt induce check
                 piece = endTile.getPiece()
                 self.updatePossibleMoves(board,piece)
                 self.isCheckingMove() 
@@ -176,3 +180,13 @@ class Player():
         for piece in self.pieceMoves:
             allMoves = allMoves | piece.getPossibleMoves(board)
         return allMoves
+    def isCheckmate(self,board):
+        for piece in self.pieceMoves:
+            startTile = piece.getTile()
+            for move in self.pieceMoves[piece]:
+                endTile = move
+                moveList = [startTile, endTile]
+                print(startTile,endTile,piece,self.clearsCheck(moveList,piece,board))
+                if self.clearsCheck(moveList, piece, board) == True:
+                    return False
+        return True
