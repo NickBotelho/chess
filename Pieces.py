@@ -161,6 +161,10 @@ class Pawn(Piece):
                 tile.setPiece(Bishop( tile, self.getTeam()))
             elif promotion == "knight":
                 tile.setPiece(Knight(tile, self.getTeam()))
+            newPiece = tile.getPiece()
+            player = board.getPlayer(self.getTeam())
+            player.updatePossibleMoves(board, newPiece)
+            player.recalculateAllPossibleMoves(board)
 
         return validMove
 

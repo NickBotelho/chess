@@ -84,6 +84,7 @@ class Player():
     def getPieceMoves(self): #dict piece --> set of possible moves
         return self.pieceMoves
     def updateAllPieceMoves(self,board):
+        #goes through every piece in piece moves and gets their possible moves
         for piece in self.pieceMoves:
             if piece.isAlive(board) == True:
                 self.pieceMoves[piece] = set()
@@ -92,6 +93,7 @@ class Player():
                 self.pieceMoves[piece] = set()
                 #or maybe delete
     def recalculateAllPossibleMoves(self,board):
+        #recalcs every pieces move in updateAllPieceMNoves() and compiles into one set
         self.updateAllPieceMoves(board)
         self.allPossibleMoves = set()
         for piece in self.pieceMoves:
