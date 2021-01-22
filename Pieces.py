@@ -19,6 +19,38 @@ class Piece: #TODO: add move tracker
         return self.getTile().getCol()
     def getColNumber(self):#number
         return self.getTile().getColNumber()
+    def isPinned(self,player, board):
+        tile = self.getTile()
+        numChecks = 0
+        opponent = player.getOpponent()
+        opponentPieceMoves = opponent.getPieceMoves()
+
+        for piece in opponentPieceMoves:
+            if player.getKing().getTile() in opponentPieceMoves[piece]:
+                numChecks+=1
+        print("Checks with piece in place:",numChecks)
+        #Simulate effect of moving piece
+        tile.setPiece(None)
+        player.opponent.recalculateAllPossibleMoves(board)
+        opponentPossibleMovesPostMove = opponent.getPieceMoves()
+        numChecksAfter = 0
+        for piece in opponentPossibleMovesPostMove:
+            if player.getKing().getTile() in opponentPossibleMovesPostMove[piece]:
+                numChecksAfter+=1
+        print("Checks with piece out of place",numChecksAfter)
+
+        #Restore state
+        tile.setPiece(self)
+        player.opponent.recalculateAllPossibleMoves(board)
+        return numChecksAfter > numChecks
+    def isAlive(self,board):
+        row = 1
+        while row < 9:
+            for col in range(8,0,-1):
+                if board.board[col][row].getPiece() == self:
+                    return True 
+            row+=1
+        return False
     def __str__(self):
         teams={
             "white":"w",

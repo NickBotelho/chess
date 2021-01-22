@@ -11,6 +11,9 @@ board.setBoard(p1,p2)
 
 wQueen = tileMap['d1'].getPiece()
 bQueen = tileMap['d8'].getPiece()
+# print(wQueen.isAlive(board))
+# board.board[4][1].setPiece(None)
+# print(wQueen.isAlive(board))
 
 #TODO: make it so you cannt move a piece that wont fix check
 
