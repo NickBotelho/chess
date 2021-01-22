@@ -164,8 +164,13 @@ class Pawn(Piece):
 class Rook(Piece):
     movement = "plus one"
     name = "Rook"
+    isShortSide = False
     def __init__(self,tile,team):
         super().__init__(tile,self.name,team)
+        if self.getCol() == 'h':
+            self.isShortSide = True
+        else:
+            self.isShortSide = False
     def getPossibleMoves(self,board):
         currentTile = self.getTile()
         x = currentTile.getColNumber()
@@ -213,6 +218,7 @@ class Rook(Piece):
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
                 return True
             else:
                 print("illegal move")
@@ -221,6 +227,7 @@ class Rook(Piece):
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
                 return True
         else:
             print("illegal move")
@@ -368,7 +375,7 @@ class King(Piece):
         return moves
     def move(self, tile, board): #TODO: implement system that prevents moves into check
         start = self.getTile()
-        end = tile
+        end = tile #end and start are tiles
         enemyPiece = end.getPiece()
         kingsTeam = self.getTeam()
         if kingsTeam == "white":
@@ -378,13 +385,50 @@ class King(Piece):
         enemy = board.getPlayer(enemyTeam)
         enemyThreats = enemy.getAllPossibleMoves()
 
-        if end in enemyThreats: print("hi")
+        #CASTLEMOVE
+        player = board.getPlayer(kingsTeam)
+        if kingsTeam == "white" and end.getName() == "c1" and self.canLongCastle(player,board):
+            rook = board.getTileMap()['a1'].getPiece()
+            rookTile = rook.getTile()
+            rookTile.setPiece(None)
+            board.getTileMap()['d1'].setPiece(rook)
+            self.getTile().setPiece(None)
+            board.getTileMap()['c1'].setPiece(self)
+            return True
+        elif kingsTeam == "white" and end.getName() == "g1" and self.canShortCastle(player,board):
+            rook = board.getTileMap()['h1'].getPiece()
+            rookTile = rook.getTile()
+            rookTile.setPiece(None)
+            board.getTileMap()['f1'].setPiece(rook)
+            self.getTile().setPiece(None)
+            board.getTileMap()['g1'].setPiece(self)
+            return True
+        elif kingsTeam == "black" and end.getName() == "c8" and self.canLongCastle(player,board):
+            rook = board.getTileMap()['a8'].getPiece()
+            rookTile = rook.getTile()
+            rookTile.setPiece(None)
+            board.getTileMap()['d8'].setPiece(rook)
+            self.getTile().setPiece(None)
+            board.getTileMap()['c8'].setPiece(self)
+            return True
+        elif kingsTeam == "white" and end.getName() == "g8" and self.canShortCastle(player,board):
+            rook = board.getTileMap()['h8'].getPiece()
+            rookTile = rook.getTile()
+            rookTile.setPiece(None)
+            board.getTileMap()['f8'].setPiece(rook)
+            self.getTile().setPiece(None)
+            board.getTileMap()['g8'].setPiece(self)
+            return True
+            
+
+
         if end not in enemyThreats:
             if enemyPiece == None:
                 if end in self.getPossibleMoves(board):
                     end.setPiece(self)
                     self.setTile(tile)
                     start.setPiece(None)
+                    self.numberOfMoves+=1
                     return True
                 else:
                     print("illegal move")
@@ -393,6 +437,7 @@ class King(Piece):
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
                 return True
             else:
                 print("illegalMOve")
@@ -400,6 +445,51 @@ class King(Piece):
         else:
             print("Illegal move: cant move into check")
             return False
+    def canLongCastle(self,player,board):
+        tileMap = board.getTileMap()
+        for piece in player.getPieceMoves():
+            if piece.name =="Rook":
+                if not piece.isShortSide:
+                    longRook = piece
+        if player.getTeam() == "white":
+            b1, c1, d1 = tileMap['b1'],tileMap['c1'],tileMap['d1']
+            if b1.getPiece() == None and c1.getPiece() == None and d1.getPiece() == None: 
+                if longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                    enemyThreats = player.getOpponent().getAllPossibleMoves()
+                    if d1 not in enemyThreats and c1 not in enemyThreats:
+                        return True
+        else:
+            b8, c8, d8 = tileMap['b8'],tileMap['c8'],tileMap['d8']
+            if b8.getPiece() == None and c8.getPiece() == None and d8.getPiece() == None: 
+                if longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                    enemyThreats = player.getOpponent().getAllPossibleMoves()
+                    if d8 not in enemyThreats and c8 not in enemyThreats:
+                        return True
+        return False
+    def canShortCastle(self,player,board):
+        tileMap = board.getTileMap()
+        for piece in player.getPieceMoves():
+            if piece.name =="Rook":
+                if piece.isShortSide:
+                    shortRook = piece
+        if player.getTeam() == "white":
+            g1, f1 = tileMap['g1'],tileMap['f1'],
+            if g1.getPiece() == None and f1.getPiece() == None: 
+                if shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                    enemyThreats = player.getOpponent().getAllPossibleMoves()
+                    if g1 not in enemyThreats and f1 not in enemyThreats:
+                        return True
+        else:
+            g8, f8 = tileMap['g8'],tileMap['f8'],
+            if g8.getPiece() == None and f8.getPiece() == None: 
+                if shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                    enemyThreats = player.getOpponent().getAllPossibleMoves()
+                    if g8 not in enemyThreats and f8 not in enemyThreats:
+                        return True
+        return False
+
+        
+
 
 class Knight(Piece):
     movement = "plus one"

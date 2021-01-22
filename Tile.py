@@ -42,7 +42,8 @@ class Tile:
         y = self.getRow()
        
         return tuple([x,y])
-
+    def getName(self):
+        return self.col+str(self.row)
     def getRow(self): #getX
         return self.row
     def getCol(self): 

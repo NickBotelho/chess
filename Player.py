@@ -111,6 +111,7 @@ class Player():
             #Gather inputs##
             start = " "
             end = " "
+            print("Castle Status:", self.king.canLongCastle(self,board), self.king.canShortCastle(self,board))
             while not self.game.checkInput(start) or not self.game.checkInput(end):
                 print("Enter The tile of the piece to move")
                 start = input()
