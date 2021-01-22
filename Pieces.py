@@ -111,10 +111,12 @@ class Pawn(Piece):
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
             elif start.getRow() - end.getRow() == -1 and end.isOccupied() == True and abs(start.getColNumber() - end.getColNumber()) == 1: #diagonal attack
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
                 #trash enemey piece right not its in lingo
             elif start.getRow() - end.getRow() == -2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0: #first move 2 spaces
                 end.setPiece(self)
@@ -130,10 +132,12 @@ class Pawn(Piece):
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
             elif start.getRow() - end.getRow() == 1 and end.isOccupied() == True and abs(start.getColNumber() - end.getColNumber()) == 1: #diagonalAttack
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
+                self.numberOfMoves+=1
                 #trash enemey piece right not its in lingo
             elif start.getRow() - end.getRow() == 2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0: #first move 2 spaces
                 end.setPiece(self)
@@ -232,8 +236,6 @@ class Rook(Piece):
         else:
             print("illegal move")
             return False
-        
-
 class Queen(Piece):
     movement = "plus one"
     name = "Queen"
@@ -342,7 +344,6 @@ class Queen(Piece):
         else:
             print("illegal move")
             return False
-
 class King(Piece):
     movement = "plus one"
     name = "King"
@@ -487,10 +488,6 @@ class King(Piece):
                     if g8 not in enemyThreats and f8 not in enemyThreats:
                         return True
         return False
-
-        
-
-
 class Knight(Piece):
     movement = "plus one"
     name = "Knight"
@@ -614,7 +611,4 @@ class Bishop(Piece):
         else:
             print("illegal move")
             return False
-        
-
-
-        
+                
