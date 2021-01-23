@@ -28,7 +28,7 @@ class Piece: #TODO: add move tracker
         for piece in opponentPieceMoves:
             if player.getKing().getTile() in opponentPieceMoves[piece]:
                 numChecks+=1
-        print("Checks with piece in place:",numChecks)
+        #print("Checks with piece in place:",numChecks)
         #Simulate effect of moving piece
         tile.setPiece(None)
         player.opponent.recalculateAllPossibleMoves(board)
@@ -37,7 +37,7 @@ class Piece: #TODO: add move tracker
         for piece in opponentPossibleMovesPostMove:
             if player.getKing().getTile() in opponentPossibleMovesPostMove[piece]:
                 numChecksAfter+=1
-        print("Checks with piece out of place",numChecksAfter)
+        #print("Checks with piece out of place",numChecksAfter)
 
         #Restore state
         tile.setPiece(self)
@@ -167,8 +167,6 @@ class Pawn(Piece):
             player.recalculateAllPossibleMoves(board)
 
         return validMove
-
-
 class Rook(Piece):
     movement = "plus one"
     name = "Rook"

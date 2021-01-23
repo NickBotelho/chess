@@ -104,6 +104,7 @@ class Player():
 
     def turn(self,board):
         finishedMove = self.numMoves+1
+        print(self.getTeam(),"'s Turn:")
         while self.numMoves < finishedMove:
             if self.isChecked == True:
                 print(self.isCheckmate(board))
@@ -113,7 +114,7 @@ class Player():
             #Gather inputs##
             start = " "
             end = " "
-            print("Castle Status:", self.king.canLongCastle(self,board), self.king.canShortCastle(self,board))
+            #print("Castle Status:", self.king.canLongCastle(self,board), self.king.canShortCastle(self,board))
             while not self.game.checkInput(start) or not self.game.checkInput(end):
                 print("Enter The tile of the piece to move")
                 start = input()
@@ -123,8 +124,7 @@ class Player():
                     print("Nonvalid input: try again. (Example input: e4)")
             #could add a really detailed move log later
             move=[start,end]
-            if start == "p":
-                board.printBlackBoard()
+
             tileMap = board.getTileMap()
             startTile = tileMap[start]
             endTile = tileMap[end]
@@ -133,7 +133,7 @@ class Player():
             #IF CHECKED#########
             while self.isChecked == True: #TODO:test (light testing worked)
                 #check if the move relieves check
-                print("checking clears check...",selectedPiece,self.clearsCheck([startTile,endTile],selectedPiece,board))
+                #print("checking clears check...",selectedPiece,self.clearsCheck([startTile,endTile],selectedPiece,board))
                 if self.clearsCheck([startTile,endTile],selectedPiece,board) == True:
                     self.isChecked = False
                 else:
@@ -142,8 +142,6 @@ class Player():
                     start = input()
                     print("Enter the tile of where to move the piece")
                     end = input()
-                    if start == "p":
-                        board.printBlackBoard()
                     startTile = tileMap[start]
                     endTile = tileMap[end]
                     selectedPiece = startTile.getPiece()
@@ -198,7 +196,6 @@ class Player():
         opponentPossibleMovesPostMove = self.opponent.getAllPossibleMoves()
 
         if king.getTile() not in opponentPossibleMovesPostMove:
-            print("blocked by:", str(selectedPiece), "-->", end)
             #check resolved
             validMove = True
             selectedPiece.setTile(start)
