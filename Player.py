@@ -147,7 +147,8 @@ class Player():
                     selectedPiece = startTile.getPiece()
             ##########################################
 
-            isPinned = selectedPiece.isPinned(self,board)
+            move = [startTile, endTile]
+            isPinned = selectedPiece.isPinned(self,board,move)
             if not isPinned and selectedPiece.move(endTile,board): #return false on a bad or illegal move
                 #TODO:make sure the move made doesnt induce check
                 piece = endTile.getPiece()

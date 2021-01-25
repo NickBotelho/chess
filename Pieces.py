@@ -19,11 +19,14 @@ class Piece: #TODO: add move tracker
         return self.getTile().getCol()
     def getColNumber(self):#number
         return self.getTile().getColNumber()
-    def isPinned(self,player, board):
+    def isPinned(self,player, board,move):
         tile = self.getTile()
         numChecks = 0
         opponent = player.getOpponent()
         opponentPieceMoves = opponent.getPieceMoves()
+        startTile = move[0]
+        endTile = move[1]
+        endTileContent = endTile.getPiece()
 
         for piece in opponentPieceMoves:
             if player.getKing().getTile() in opponentPieceMoves[piece]:
@@ -31,6 +34,7 @@ class Piece: #TODO: add move tracker
         #print("Checks with piece in place:",numChecks)
         #Simulate effect of moving piece
         tile.setPiece(None)
+        endTile.setPiece(self)
         player.opponent.recalculateAllPossibleMoves(board)
         opponentPossibleMovesPostMove = opponent.getPieceMoves()
         numChecksAfter = 0
@@ -41,6 +45,7 @@ class Piece: #TODO: add move tracker
 
         #Restore state
         tile.setPiece(self)
+        endTile.setPiece(endTileContent)
         player.opponent.recalculateAllPossibleMoves(board)
         return numChecksAfter > numChecks
     def isAlive(self,board):
