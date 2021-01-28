@@ -1,4 +1,5 @@
 from Game import Game
+from random import randint
 class Player():
     elo = None
     numMoves = 0
@@ -105,9 +106,16 @@ class Player():
             print(str(piece), " --> ", self.pieceMoves[piece])
     def getActivePieces(self):
         self.activePieces = set()
+        self.activePiecesString = []
         for piece in self.pieceMoves:
             if piece.isAlive():
                 self.activePieces.add(piece)
+                word = str(piece)
+                self.activePiecesString.append(word)
+        return self.activePieces
+    def getStringListOfActivePieces(self):
+        self.getActivePieces()
+        return self.activePiecesString
     def calculateAllPossibleAttacks(self):
         allPossibleAttacks = set()
         self.getActivePieces()
@@ -207,12 +215,12 @@ class Player():
         end = move[1]
         king = self.getKing()
         endContents = end.getPiece()
-        
+        print("going into it:",selectedPiece,start,end)
         #simluate the move
         selectedPiece.setTile(end)
         start.setPiece(None)
         end.setPiece(selectedPiece)
- 
+        print("simulate:",selectedPiece,start,end)
         #recalculate the new possible moves
      
         self.opponent.calculateAllPossibleAttacks()
@@ -232,7 +240,7 @@ class Player():
             start.setPiece(selectedPiece)
             end.setPiece(endContents)
         self.opponent.calculateAllPossibleAttacks()
-
+        print("restore:",selectedPiece,start,end)
         return validMove
 
     
@@ -247,3 +255,90 @@ class Player():
                 if self.clearsCheck(moveList, piece, board) == True:
                     return False
         return True
+
+
+#Ai branch starts here
+    def getComputerMoves(self,board):#set of lists containing moves [0] piece [1]sttart [2] end
+            self.getActivePieces()
+            self.recalculateAllPossibleMoves(board)
+            self.calculateAllPossibleAttacks()
+            self.computerizedMoves = set()
+            for piece in self.activePieces:
+                allMoves = piece.getPossibleMoves()
+                attacks = piece.getPossibleAttacks()
+                startTile = piece.getTile()
+                if len(attacks) > 0:
+                    for attack in attacks:
+                        self.computerizedMoves.add(tuple([piece,startTile,attack]))
+                else:
+                    for move in allMoves:
+                        self.computerizedMoves.add(tuple([piece,startTile,move]))
+            return self.computerizedMoves
+
+    def computerTurn(self,board):
+        finishedMove = self.numMoves+1
+        print(self.getTeam(),"'s Turn:")
+        
+        while self.numMoves < finishedMove:
+            if self.isChecked == True:
+                print(self.isCheckmate(board))
+                if self.isCheckmate(board) == True:
+                    print("Checkmate")
+
+            #Gather inputs##
+
+                
+
+            start = " "
+            end = " "
+            computer = self.getComputerMoves(board)
+            index = randint(0,len(computer))
+            track = 0
+            for i in computer:
+                packet = i
+                if track == index:
+                    break
+                track+=1
+
+
+            selectedPiece = packet[0]
+            startTile = packet[1]
+            endTile = packet[2]
+
+            #IF CHECKED#########
+            while self.isChecked == True: #TODO:test (light testing worked)
+                if self.clearsCheck([startTile,endTile],selectedPiece,board) == True:
+                    self.isChecked = False
+                else:
+                    print("Illegal Move: must resolve check")
+                    computer = self.getComputerMoves(board)
+                    index = randint(0,len(computer))
+                    track = 0
+                    for i in computer:
+                        packet = i
+                        if track == index:
+                            break
+                        track+=1
+                    selectedPiece = packet[0]
+                    startTile = packet[1]
+                    endTile = packet[2]
+                    selectedPiece = startTile.getPiece()
+                    #print("Running in the clearsCheck function",selectedPiece,startTile,endTile)
+            ##########################################
+
+            move = [startTile, endTile]
+            capturedPiece = endTile.getPiece()
+            isPinned = selectedPiece.isPinned(self,move)
+            if not isPinned and selectedPiece.move(endTile): #return false on a bad or illegal move
+                #TODO:make sure the move made doesnt induce check
+                piece = endTile.getPiece()
+                self.recalculateAllPossibleMoves(board)
+                self.opponent.recalculateAllPossibleMoves(board)
+                self.isCheckingMove() 
+                self.numMoves +=1
+                #board.logMove(self,move,selectedPiece,capturedPiece)
+                input()
+                
+            else:
+                if isPinned:
+                    print("Illegal move:", selectedPiece, " is pinned.")

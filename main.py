@@ -18,11 +18,12 @@ bQueen = tileMap['d8']
 gameRunning = True
 while gameRunning:
 
-
+    print("p1 active pieces",p1.getStringListOfActivePieces())
     board.printBoard()
-    p1.turn(board)
-
-    board.printBoard()
-    p2.turn(board)
+    p1.computerTurn(board)
     
+    print("p2 active pieces",p2.getStringListOfActivePieces())
+    board.printBoard()
+    p2.computerTurn(board)
+
 

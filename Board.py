@@ -108,7 +108,8 @@ class Board:
                 if self.board[col][row].getPiece() != None:
                     pieces.add(self.board[col][row].getPiece())
             row+=1
-        return pieces
+        self.activePieces = pieces
+        return self.activePieces
 
     def getActivePieces(self):
         return self.activePieces

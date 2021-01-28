@@ -27,35 +27,57 @@ class Piece: #TODO: add move tracker
         tile = self.getTile()
         numChecks = 0
         opponent = player.getOpponent()
-        opponentPieceMoves = opponent.getPieceMoves()
+        activeOpponentPieces = opponent.getActivePieces()
         startTile = move[0]
         endTile = move[1]
         endTileContent = endTile.getPiece()
 
-        for piece in opponentPieceMoves:
-            if player.getKing().getTile() in opponentPieceMoves[piece]:
+        for piece in activeOpponentPieces:
+            piece.getPossibleMoves()
+            if player.getKing().getTile() in piece.getPossibleAttacks():
                 numChecks+=1
-        #print("Checks with piece in place:",numChecks)
+
         #Simulate effect of moving piece
         tile.setPiece(None)
         endTile.setPiece(self)
-        player.opponent.recalculateAllPossibleMoves(self.board)
-        opponentPossibleMovesPostMove = opponent.getPieceMoves()
+        self.setTile(endTile)
+
         numChecksAfter = 0
-        for piece in opponentPossibleMovesPostMove:
-            if player.getKing().getTile() in opponentPossibleMovesPostMove[piece]:
+        for piece in activeOpponentPieces:
+            piece.getPossibleMoves()
+            if player.getKing().getTile() in piece.getPossibleAttacks():
                 numChecksAfter+=1
         #print("Checks with piece out of place",numChecksAfter)
 
         #Restore state
         tile.setPiece(self)
         endTile.setPiece(endTileContent)
-        player.opponent.recalculateAllPossibleMoves(self.board)
+        self.setTile(tile)
+        opponent.recalculateAllPossibleMoves(self.board)
+        for piece in activeOpponentPieces:
+            piece.getPossibleMoves()
         return numChecksAfter > numChecks
     def isAlive(self):
+        #self.board.setActivePieces()
         return self in self.board.getActivePieces()
     def getPossibleAttacks(self): #gets all the tiles that can be attacked have have an enemy on them
         return self.possibleAttacks
+    def executeMove(self,end):
+        player = self.board.getPlayer(self.getTeam())
+        tile = self.getTile()
+        endContents = end.getPiece()
+        end.setPiece(self)
+        self.setTile(end)
+        tile.setPiece(None)
+        self.numberOfMoves+=1
+        ####if the move is caputring a piece
+        if endContents != None:
+            #add to player.capturedPIeces
+            #recalc enemies active pieces
+            self.board.setActivePieces()
+            player.getOpponent().getActivePieces()
+            
+
         
     def __str__(self):
         teams={
@@ -64,6 +86,7 @@ class Piece: #TODO: add move tracker
         }
         return "("+teams[self.team] + ") " + self.name 
         #+ " is on " + str(self.currentTile)
+
     
     
 
@@ -132,7 +155,7 @@ class Pawn(Piece):
                 start.setPiece(None)
                 self.numberOfMoves+=1
                 #trash enemey piece right not its in lingo
-            elif start.getRow() - end.getRow() == -2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0: #first move 2 spaces
+            elif start.getRow() - end.getRow() == -2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0 and start.isStraightClearPath(end,self.board): #first move 2 spaces
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
@@ -153,7 +176,7 @@ class Pawn(Piece):
                 start.setPiece(None)
                 self.numberOfMoves+=1
                 #trash enemey piece right not its in lingo
-            elif start.getRow() - end.getRow() == 2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0: #first move 2 spaces
+            elif start.getRow() - end.getRow() == 2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0 and start.isStraightClearPath(end,self.board): #first move 2 spaces
                 end.setPiece(self)
                 self.setTile(tile)
                 start.setPiece(None)
