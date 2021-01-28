@@ -10,7 +10,9 @@ class Player():
         self.team = team
         self.name = name
         self.pieceMoves = self.calibrate(board)
+        self.activePieces = self.getActivePieces()
         self.game = Game()
+        self.allPossibleAttacks = self.calculateAllPossibleAttacks()
 
         
     def calibrate(self,board): #ran in conjunction with reset/creation of a board
@@ -19,62 +21,62 @@ class Player():
             pawnIndex = 1
             while pawnIndex < 9:
                 currentPawn = board.board[pawnIndex][2].getPiece()
-                pieceMoves[currentPawn] = currentPawn.getPossibleMoves(board)
-                self.allPossibleMoves = self.allPossibleMoves | currentPawn.getPossibleMoves(board)
+                pieceMoves[currentPawn] = currentPawn.getPossibleMoves()
+                self.allPossibleMoves = self.allPossibleMoves | currentPawn.getPossibleMoves()
                 pawnIndex+=1
             #rooks
             rook = board.board[1][1].getPiece()
-            pieceMoves[rook] = rook.getPossibleMoves(board)
+            pieceMoves[rook] = rook.getPossibleMoves()
             rook = board.board[8][1].getPiece()
-            pieceMoves[rook] = rook.getPossibleMoves(board)
+            pieceMoves[rook] = rook.getPossibleMoves()
             #knights
             knight = board.board[2][1].getPiece()
-            pieceMoves[knight] = knight.getPossibleMoves(board)
+            pieceMoves[knight] = knight.getPossibleMoves()
             knight = board.board[7][1].getPiece()
-            pieceMoves[knight] = knight.getPossibleMoves(board)
+            pieceMoves[knight] = knight.getPossibleMoves()
             #Bishops
             bishop = board.board[3][1].getPiece()
-            pieceMoves[bishop] = bishop.getPossibleMoves(board)
+            pieceMoves[bishop] = bishop.getPossibleMoves()
             bishop = board.board[6][1].getPiece()
-            pieceMoves[bishop] = bishop.getPossibleMoves(board)
+            pieceMoves[bishop] = bishop.getPossibleMoves()
             #queen
             self.queen = board.board[4][1].getPiece()
-            pieceMoves[self.queen] = self.queen.getPossibleMoves(board)
+            pieceMoves[self.queen] = self.queen.getPossibleMoves()
             #king
             self.king = board.board[5][1].getPiece()
-            pieceMoves[self.king] = self.king.getPossibleMoves(board)
+            pieceMoves[self.king] = self.king.getPossibleMoves()
         else: #black pieces
             pawnIndex = 1
             while pawnIndex < 9:
                 currentPawn = board.board[pawnIndex][7].getPiece()
-                pieceMoves[currentPawn] = currentPawn.getPossibleMoves(board)
-                self.allPossibleMoves = self.allPossibleMoves | currentPawn.getPossibleMoves(board)
+                pieceMoves[currentPawn] = currentPawn.getPossibleMoves()
+                self.allPossibleMoves = self.allPossibleMoves | currentPawn.getPossibleMoves()
                 pawnIndex+=1
             #rooks
             rook = board.board[1][8].getPiece()
-            pieceMoves[rook] = rook.getPossibleMoves(board)
+            pieceMoves[rook] = rook.getPossibleMoves()
             rook = board.board[8][8].getPiece()
-            pieceMoves[rook] = rook.getPossibleMoves(board)
+            pieceMoves[rook] = rook.getPossibleMoves()
             #knights
             knight = board.board[2][8].getPiece()
-            pieceMoves[knight] = knight.getPossibleMoves(board)
+            pieceMoves[knight] = knight.getPossibleMoves()
             knight = board.board[7][8].getPiece()
-            pieceMoves[knight] = knight.getPossibleMoves(board)
+            pieceMoves[knight] = knight.getPossibleMoves()
             #Bishops
             bishop = board.board[3][8].getPiece()
-            pieceMoves[bishop] = bishop.getPossibleMoves(board)
+            pieceMoves[bishop] = bishop.getPossibleMoves()
             bishop = board.board[6][8].getPiece()
-            pieceMoves[bishop] = bishop.getPossibleMoves(board)
+            pieceMoves[bishop] = bishop.getPossibleMoves()
             #queen
             self.queen = board.board[4][8].getPiece()
-            pieceMoves[self.queen] = self.queen.getPossibleMoves(board)
+            pieceMoves[self.queen] = self.queen.getPossibleMoves()
             #king
             self.king = board.board[5][8].getPiece()
-            pieceMoves[self.king] = self.king.getPossibleMoves(board)
+            pieceMoves[self.king] = self.king.getPossibleMoves()
 
         return pieceMoves
     def updatePossibleMoves(self,board,piece):
-        self.pieceMoves[piece] = piece.getPossibleMoves(board)
+        self.pieceMoves[piece] = piece.getPossibleMoves()
     def setAllPossibleMoves(self, moves):
         self.allPossibleMoves = moves
     def setPieceMoves(self, moves):
@@ -86,11 +88,11 @@ class Player():
     def updateAllPieceMoves(self,board):
         #goes through every piece in piece moves and gets their possible moves
         for piece in self.pieceMoves:
-            if piece.isAlive(board) == True:
+            if piece.isAlive() == True:
                 self.pieceMoves[piece] = set()
-                self.pieceMoves[piece] = piece.getPossibleMoves(board)
+                self.pieceMoves[piece] = piece.getPossibleMoves()
             else:
-                self.pieceMoves[piece] = set()
+                del self.pieceMoves[piece]
                 #or maybe delete
     def recalculateAllPossibleMoves(self,board):
         #recalcs every pieces move in updateAllPieceMNoves() and compiles into one set
@@ -101,15 +103,30 @@ class Player():
     def showPieces(self): #debugging tool prints piece -- > possible tiles it can move to
         for piece in self.pieceMoves:
             print(str(piece), " --> ", self.pieceMoves[piece])
+    def getActivePieces(self):
+        self.activePieces = set()
+        for piece in self.pieceMoves:
+            if piece.isAlive():
+                self.activePieces.add(piece)
+    def calculateAllPossibleAttacks(self):
+        allPossibleAttacks = set()
+        self.getActivePieces()
+        for piece in self.activePieces:
+            if piece.getName() == "Pawn":
+                allPossibleAttacks = allPossibleAttacks | piece.getPossibleAttacks()
+            else:
+                allPossibleAttacks = allPossibleAttacks | piece.getPossibleMoves()
+        self.allPossibleAttacks = allPossibleAttacks
+        return self.allPossibleAttacks
 
     def turn(self,board):
         finishedMove = self.numMoves+1
         print(self.getTeam(),"'s Turn:")
         while self.numMoves < finishedMove:
-            if self.isChecked == True:
-                print(self.isCheckmate(board))
-                if self.isCheckmate(board) == True:
-                    print("Checkmate")
+            # if self.isChecked == True:
+            #     print(self.isCheckmate(board))
+            #     if self.isCheckmate(board) == True:
+            #         print("Checkmate")
 
             #Gather inputs##
             start = " "
@@ -148,8 +165,8 @@ class Player():
             ##########################################
 
             move = [startTile, endTile]
-            isPinned = selectedPiece.isPinned(self,board,move)
-            if not isPinned and selectedPiece.move(endTile,board): #return false on a bad or illegal move
+            isPinned = selectedPiece.isPinned(self,move)
+            if not isPinned and selectedPiece.move(endTile): #return false on a bad or illegal move
                 #TODO:make sure the move made doesnt induce check
                 piece = endTile.getPiece()
                 self.recalculateAllPossibleMoves(board)
@@ -187,14 +204,17 @@ class Player():
         end = move[1]
         king = self.getKing()
         endContents = end.getPiece()
+        
         #simluate the move
         selectedPiece.setTile(end)
         start.setPiece(None)
         end.setPiece(selectedPiece)
+ 
         #recalculate the new possible moves
      
-        self.opponent.recalculateAllPossibleMoves(board)
-        opponentPossibleMovesPostMove = self.opponent.getAllPossibleMoves()
+        self.opponent.calculateAllPossibleAttacks()
+        opponentPossibleMovesPostMove = self.opponent.allPossibleAttacks
+
 
         if king.getTile() not in opponentPossibleMovesPostMove:
             #check resolved
@@ -208,9 +228,8 @@ class Player():
             selectedPiece.setTile(start)
             start.setPiece(selectedPiece)
             end.setPiece(endContents)
-        self.opponent.recalculateAllPossibleMoves(board)
-        # self.opponent.setAllPossibleMoves(allMovesSaveState)
-        # self.opponent.setPieceMoves(pieceMovesSaveSate)
+        self.opponent.calculateAllPossibleAttacks()
+
         return validMove
 
     

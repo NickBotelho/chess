@@ -7,6 +7,8 @@ class Board:
     def __init__(self):
         self.stitch()
         self.populatePieces()
+        self.activePieces = self.setActivePieces()
+
 
     def stitch(self):
         cols = ['a','b','c','d','e','f','g','h']
@@ -32,7 +34,7 @@ class Board:
             numPawns = 1
             while numPawns <= 8:
                 currentTile = self.board[numPawns][pawnRowStart[team]]
-                currentTile.setPiece(Pawn(currentTile,team))
+                currentTile.setPiece(Pawn(currentTile,team,self))
                 numPawns+=1
         mainPieceStartRow = {
             "white":1,
@@ -41,25 +43,25 @@ class Board:
         for team in teams:
             #rooks
             currentTile = self.board[1][mainPieceStartRow[team]]
-            currentTile.setPiece(Rook(currentTile,team))
+            currentTile.setPiece(Rook(currentTile,team,self))
             currentTile = self.board[8][mainPieceStartRow[team]]
-            currentTile.setPiece(Rook(currentTile,team))
+            currentTile.setPiece(Rook(currentTile,team,self))
             #Knights
             currentTile = self.board[2][mainPieceStartRow[team]]
-            currentTile.setPiece(Knight(currentTile,team))
+            currentTile.setPiece(Knight(currentTile,team,self))
             currentTile = self.board[7][mainPieceStartRow[team]]
-            currentTile.setPiece(Knight(currentTile,team))
+            currentTile.setPiece(Knight(currentTile,team,self))
             #bishops
             currentTile = self.board[3][mainPieceStartRow[team]]
-            currentTile.setPiece(Bishop(currentTile,team))
+            currentTile.setPiece(Bishop(currentTile,team,self))
             currentTile = self.board[6][mainPieceStartRow[team]]
-            currentTile.setPiece(Bishop(currentTile,team))
+            currentTile.setPiece(Bishop(currentTile,team,self))
             #queen
             currentTile = self.board[4][mainPieceStartRow[team]]
-            currentTile.setPiece(Queen(currentTile,team))
+            currentTile.setPiece(Queen(currentTile,team,self))
             #king
             currentTile = self.board[5][mainPieceStartRow[team]]
-            currentTile.setPiece(King(currentTile,team))
+            currentTile.setPiece(King(currentTile,team,self))
 
     def printBoard(self):
         row = 8
@@ -97,3 +99,16 @@ class Board:
             self.players["black"] = player1
     def getPlayer(self, team):
         return self.players[team]
+
+    def setActivePieces(self):
+        row = 1
+        pieces = set()
+        while row < 9:
+            for col in range(8,0,-1):
+                if self.board[col][row].getPiece() != None:
+                    pieces.add(self.board[col][row].getPiece())
+            row+=1
+        return pieces
+
+    def getActivePieces(self):
+        return self.activePieces

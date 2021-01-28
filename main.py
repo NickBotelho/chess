@@ -18,10 +18,12 @@ bQueen = tileMap['d8']
 gameRunning = True
 while gameRunning:
 
+    for i in p1.calculateAllPossibleAttacks():
+        print(i)
     board.printBoard()
     p1.turn(board)
 
-    board.printBlackBoard()
+    board.printBoard()
     p2.turn(board)
     
 
