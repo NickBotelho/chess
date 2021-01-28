@@ -6,3 +6,7 @@ class Game():
 
     def checkInput(self,move):
         return type(move) == str and len(move) == 2 and move[0] in self.cols and move[1] in self.rows
+
+    def checkTeam(self, player, move):
+        return player.getTeam() == move[0].getPiece().getTeam()
+        

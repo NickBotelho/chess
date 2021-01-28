@@ -123,10 +123,10 @@ class Player():
         finishedMove = self.numMoves+1
         print(self.getTeam(),"'s Turn:")
         while self.numMoves < finishedMove:
-            # if self.isChecked == True:
-            #     print(self.isCheckmate(board))
-            #     if self.isCheckmate(board) == True:
-            #         print("Checkmate")
+            if self.isChecked == True:
+                print(self.isCheckmate(board))
+                if self.isCheckmate(board) == True:
+                    print("Checkmate")
 
             #Gather inputs##
             start = " "
@@ -146,6 +146,7 @@ class Player():
             startTile = tileMap[start]
             endTile = tileMap[end]
             selectedPiece = startTile.getPiece()
+
 
             #IF CHECKED#########
             while self.isChecked == True: #TODO:test (light testing worked)
@@ -178,6 +179,8 @@ class Player():
                     print("Illegal move:", selectedPiece, " is pinned.")
     def getName(self):
         return self.name
+    def getTeam(self):
+        return self.team
     def isChecked(self):
         #return true or false is players king is in check
         return self.isChecked
@@ -194,7 +197,7 @@ class Player():
     def isCheckingMove(self):
         opponentKing = self.getOpponent().getKing()
         kingTile = opponentKing.getTile()
-        if kingTile in self.getAllPossibleMoves():
+        if kingTile in self.calculateAllPossibleAttacks():
             print(self.opponent.getName(), "is in check!")
             self.opponent.isChecked = True
         else:
