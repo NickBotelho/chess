@@ -8,6 +8,7 @@ class Board:
         self.stitch()
         self.populatePieces()
         self.activePieces = self.setActivePieces()
+        self.log = []
 
 
     def stitch(self):
@@ -117,3 +118,26 @@ class Board:
     def isDraw(self,player):
         opponent = player.getOpponent()
         return len(player.getActivePieces()) == 1 and player.getKing().isAlive() and len(opponent.getActivePieces()) == 1 and opponent.getKing().isAlive()
+
+    def logMove(self,player, move, selectedPiece):
+        enemyPiece = move[1].getPiece()
+        if selectedPiece.getTeam() == "white":
+            numMoves = player.getNumberOfMoves()
+            numMoves = str(numMoves)
+            self.currentMove = numMoves+". "
+            abbrev = selectedPiece.getAbbreviation()
+            endTileName = move[1].getName()
+            if enemyPiece == None:   
+                self.currentMove = self.currentMove + abbrev+endTileName + " "
+            else:
+                self.currentMove = self.currentMove + abbrev + "x" + endTileName + " "
+
+        if selectedPiece.getTeam() == "black":
+
+            self.log.append(self.currentMove)
+            self.currentMove = ""
+
+    def printLog(self):
+        for log in self.log:
+            print(log, end ='\t')
+        

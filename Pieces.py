@@ -58,9 +58,10 @@ class Piece: #TODO: add move tracker
             piece.getPossibleMoves()
         return numChecksAfter > numChecks
     def isAlive(self):
-        #self.board.setActivePieces()
+        
         return self in self.board.getActivePieces()
     def getPossibleAttacks(self): #gets all the tiles that can be attacked have have an enemy on them
+        self.getPossibleMoves()
         return self.possibleAttacks
     def executeMove(self,end):
         player = self.board.getPlayer(self.getTeam())
@@ -76,9 +77,20 @@ class Piece: #TODO: add move tracker
             #recalc enemies active pieces
             self.board.setActivePieces()
             player.getOpponent().getActivePieces()
+    def getAbbreviation(self):
+        if self.name == "Pawn":
+            return ""
+        elif self.name == "Rook":
+            return "R"
+        elif self.name == "Bishop":
+            return "B"
+        elif self.name == "Knight":
+            return "N"
+        elif self.name == "Queen":
+            return "Q"
+        elif self.name == "King":
+            return "K"
 
-
-        
     def __str__(self):
         teams={
             "white":"w",
@@ -103,7 +115,8 @@ class Pawn(Piece):
                 y = self.getTile().getRow() + 2
             else:
                 y = self.getTile().getRow() - 2
-            possibleMoves.add(self.board.board[self.getTile().getColNumber()][y])
+            if self.board.board[self.getTile().getColNumber()][y].getPiece == None:
+                possibleMoves.add(self.board.board[self.getTile().getColNumber()][y])
         if self.getTeam() == "white":
             if self.getTile().getRow() < 8:
                 front = self.board.board[self.getTile().getColNumber()][self.getTile().getRow()+1]
@@ -480,7 +493,7 @@ class King(Piece):
                 else:
                     print("illegal move")
                     return False
-            elif end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam() and end in safeMoves:
+            elif enemyPiece != None and end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam() and end in safeMoves:
                 self.executeMove(end)
                 return True
             else:

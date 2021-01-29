@@ -121,8 +121,8 @@ class Player():
         return self.activePiecesString
     def calculateAllPossibleAttacks(self):
         allPossibleAttacks = set()
-        self.getActivePieces()
-        for piece in self.activePieces:
+        active = self.getActivePieces()
+        for piece in active:
             if piece.getName() == "Pawn":
                 allPossibleAttacks = allPossibleAttacks | piece.getPossibleAttacks()
             else:
@@ -214,44 +214,36 @@ class Player():
         else:
             self.opponent.isChecked = False
     def clearsCheck(self,move,selectedPiece,board):
-        #print("Running clears check function")
         start = move[0]
         end = move[1]
-        king = self.getKing()
         endContents = end.getPiece()
+        opponent = self.getOpponent()
+        board.setActivePieces()
         if endContents != None:
             endContents.setTile(None)
-        #print("going into it:",selectedPiece,start,end)
-        #simluate the move
-        selectedPiece.setTile(end)
+        # print("proposed move:", start, " ->", end)      
+        # print("pre state", start, selectedPiece.getTile(), end,end.getPiece())
+        #SIMULATE MOVE
+        if endContents != None:
+            endContents.setTile(None)
         start.setPiece(None)
+        selectedPiece.setTile(end)
         end.setPiece(selectedPiece)
+
+        board.setActivePieces()
+       
+        validMove = self.getKing().getTile() not in opponent.calculateAllPossibleAttacks()
+        #restore state
+        end.setPiece(endContents)
         if endContents != None:
             endContents.setTile(end)
-        #print("simulate:",selectedPiece,start,end)
-        #recalculate the new possible moves
-     
-        
-        opponentPossibleMovesPostMove = self.opponent.calculateAllPossibleAttacks()
-
-
-        if king.getTile() not in opponentPossibleMovesPostMove:
-            #check resolved
-            validMove = True
-            selectedPiece.setTile(start)
-            start.setPiece(selectedPiece)
-            end.setPiece(endContents)
-        else:
-            #check not resolved
-            validMove = False
-            selectedPiece.setTile(start)
-            start.setPiece(selectedPiece)
-            end.setPiece(endContents)
-        self.opponent.calculateAllPossibleAttacks()
-        #print("restore:",selectedPiece,start,end)
+        start.setPiece(selectedPiece)
+        selectedPiece.setTile(start)
+        board.setActivePieces()
+        opponent.calculateAllPossibleAttacks()
+    
         return validMove
 
-    
     def isCheckmate(self,board):
         for piece in self.pieceMoves:
             startTile = piece.getTile()
@@ -290,6 +282,7 @@ class Player():
         while self.numMoves < finishedMove:
             if board.isDraw(self):
                 print("Draw!")
+                board.printLog()
                 input()
             if self.isChecked == True:
                 print(self.isCheckmate(board))
@@ -345,7 +338,7 @@ class Player():
                 self.opponent.recalculateAllPossibleMoves(board)
                 self.isCheckingMove() 
                 self.numMoves +=1
-                #board.logMove(self,move,selectedPiece,capturedPiece)
+                board.logMove(self,move,selectedPiece)
                 #input()
                 
             else:
@@ -361,6 +354,9 @@ class Player():
                     self.cache.add(packet)
                     return packet
         return packet
+
+    def getNumberOfMoves(self):
+        return self.numMoves
                 
 
 
