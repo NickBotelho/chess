@@ -113,3 +113,7 @@ class Board:
 
     def getActivePieces(self):
         return self.activePieces
+
+    def isDraw(self,player):
+        opponent = player.getOpponent()
+        return len(player.getActivePieces()) == 1 and player.getKing().isAlive() and len(opponent.getActivePieces()) == 1 and opponent.getKing().isAlive()

@@ -112,8 +112,9 @@ class Player():
                 word = str(piece)
                 self.activePiecesString.append(word)
         return self.activePieces
-    def addPromotedPiece(self,piece):
+    def addPromotedPiece(self,piece,board):
         self.pieceMoves[piece] = piece.getPossibleMoves()
+        board.setActivePieces()
         self.activePieces.add(piece)
     def getStringListOfActivePieces(self):
         self.getActivePieces()
@@ -218,16 +219,20 @@ class Player():
         end = move[1]
         king = self.getKing()
         endContents = end.getPiece()
+        if endContents != None:
+            endContents.setTile(None)
         #print("going into it:",selectedPiece,start,end)
         #simluate the move
         selectedPiece.setTile(end)
         start.setPiece(None)
         end.setPiece(selectedPiece)
+        if endContents != None:
+            endContents.setTile(end)
         #print("simulate:",selectedPiece,start,end)
         #recalculate the new possible moves
      
-        self.opponent.calculateAllPossibleAttacks()
-        opponentPossibleMovesPostMove = self.opponent.allPossibleAttacks
+        
+        opponentPossibleMovesPostMove = self.opponent.calculateAllPossibleAttacks()
 
 
         if king.getTile() not in opponentPossibleMovesPostMove:
@@ -251,10 +256,10 @@ class Player():
         for piece in self.pieceMoves:
             startTile = piece.getTile()
             #need to update moves
-            for move in self.pieceMoves[piece]:
+            for move in piece.getPossibleMoves():
                 endTile = move
                 moveList = [startTile, endTile]
-                #print(startTile,endTile,self.clearsCheck(moveList,piece,board))
+                print(startTile,endTile,self.clearsCheck(moveList,piece,board))
                 if self.clearsCheck(moveList, piece, board) == True:
                     return False
         return True
@@ -270,12 +275,12 @@ class Player():
                 allMoves = piece.getPossibleMoves()
                 attacks = piece.getPossibleAttacks()
                 startTile = piece.getTile()
-                if len(attacks) > 0:
-                    for attack in attacks:
-                        self.computerizedMoves.add(tuple([piece,startTile,attack]))
-                else:
-                    for move in allMoves:
-                        self.computerizedMoves.add(tuple([piece,startTile,move]))
+                # if len(attacks) > 0:
+                #     for attack in attacks:
+                #         self.computerizedMoves.add(tuple([piece,startTile,attack]))
+                # else:
+                for move in allMoves:
+                    self.computerizedMoves.add(tuple([piece,startTile,move]))
             return self.computerizedMoves
 
     def computerTurn(self,board):
@@ -283,10 +288,14 @@ class Player():
         print(self.getTeam(),"'s Turn:")
         
         while self.numMoves < finishedMove:
+            if board.isDraw(self):
+                print("Draw!")
+                input()
             if self.isChecked == True:
                 print(self.isCheckmate(board))
                 if self.isCheckmate(board) == True:
                     print("Checkmate")
+                    input()
 
             #Gather inputs##
 
@@ -310,19 +319,14 @@ class Player():
             print("Move:", startTile, "-->", endTile)
 
             #IF CHECKED#########
+            self.cache ={None}
             while self.isChecked == True: #TODO:test (light testing worked)
                 if self.clearsCheck([startTile,endTile],selectedPiece,board) == True:
                     self.isChecked = False
                 else:
                     print("Illegal Move: must resolve check")
                     computer = self.getComputerMoves(board)
-                    index = randint(0,len(computer))
-                    track = 0
-                    for i in computer:
-                        packet = i
-                        if track == index:
-                            break
-                        track+=1
+                    packet = self.getMovePacket(self.cache,computer)
                     selectedPiece = packet[0]
                     startTile = packet[1]
                     endTile = packet[2]
@@ -347,3 +351,18 @@ class Player():
             else:
                 if isPinned:
                     print("Illegal move:", selectedPiece, " is pinned.")
+    def getMovePacket(self,cache,computer): 
+        packet = None
+        while packet in self.cache:
+            for i in computer:
+                #print(self.cache)
+                packet = i
+                if packet not in self.cache:
+                    self.cache.add(packet)
+                    return packet
+        return packet
+                
+
+
+
+

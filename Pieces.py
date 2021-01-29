@@ -186,9 +186,10 @@ class Pawn(Piece):
                 tile.setPiece(Knight(tile, self.getTeam(),self.board))
             newPiece = tile.getPiece()
             player = self.board.getPlayer(self.getTeam())
+            player.addPromotedPiece(newPiece,self.board)
             player.updatePossibleMoves(self.board, newPiece)
             player.recalculateAllPossibleMoves(self.board)
-            player.addPromotedPiece(newPiece)
+            
             
 
         return validMove
@@ -417,7 +418,7 @@ class King(Piece):
         else:
             enemyTeam = "white"
         enemy = self.board.getPlayer(enemyTeam)
-        enemyThreats = enemy.calculateAllPossibleAttacks()
+        
 
         #CASTLEMOVE
         player = self.board.getPlayer(kingsTeam)
@@ -453,18 +454,33 @@ class King(Piece):
             self.getTile().setPiece(None)
             self.board.getTileMap()['g8'].setPiece(self)
             return True
-            
 
+        enemyThreats = enemy.calculateAllPossibleAttacks()   
+        safeMoves = set()
+
+        for move in self.getPossibleMoves(): 
+             
+            cacheContents = move.getPiece()
+            move.setPiece(self)
+            self.setTile(move)
+            start.setPiece(None)
+            simulatedThreats = enemy.calculateAllPossibleAttacks()
+            if move not in simulatedThreats:
+                safeMoves.add(move)
+            move.setPiece(cacheContents)
+            self.setTile(start)
+            start.setPiece(self)
+            enemy.calculateAllPossibleAttacks()
 
         if end not in enemyThreats:
-            if enemyPiece == None:
+            if enemyPiece == None and end in safeMoves:
                 if end in self.getPossibleMoves():
                     self.executeMove(end)
                     return True
                 else:
                     print("illegal move")
                     return False
-            elif end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam():
+            elif end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam() and end in safeMoves:
                 self.executeMove(end)
                 return True
             else:
