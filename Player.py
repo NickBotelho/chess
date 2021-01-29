@@ -213,7 +213,7 @@ class Player():
         else:
             self.opponent.isChecked = False
     def clearsCheck(self,move,selectedPiece,board):
-        print("Running clears check function")
+        #print("Running clears check function")
         start = move[0]
         end = move[1]
         king = self.getKing()
@@ -342,7 +342,7 @@ class Player():
                 self.isCheckingMove() 
                 self.numMoves +=1
                 #board.logMove(self,move,selectedPiece,capturedPiece)
-                input()
+                #input()
                 
             else:
                 if isPinned:
