@@ -88,13 +88,12 @@ class Player():
         return self.pieceMoves
     def updateAllPieceMoves(self,board):
         #goes through every piece in piece moves and gets their possible moves
+        newPM = {}
         for piece in self.pieceMoves:
             if piece.isAlive() == True:
-                self.pieceMoves[piece] = set()
-                self.pieceMoves[piece] = piece.getPossibleMoves()
-            else:
-                del self.pieceMoves[piece]
-                #or maybe delete
+               newPM[piece] = piece.getPossibleMoves()
+ 
+        self.pieceMoves = newPM
     def recalculateAllPossibleMoves(self,board):
         #recalcs every pieces move in updateAllPieceMNoves() and compiles into one set
         self.updateAllPieceMoves(board)
@@ -113,6 +112,9 @@ class Player():
                 word = str(piece)
                 self.activePiecesString.append(word)
         return self.activePieces
+    def addPromotedPiece(self,piece):
+        self.pieceMoves[piece] = piece.getPossibleMoves()
+        self.activePieces.add(piece)
     def getStringListOfActivePieces(self):
         self.getActivePieces()
         return self.activePiecesString
@@ -211,16 +213,17 @@ class Player():
         else:
             self.opponent.isChecked = False
     def clearsCheck(self,move,selectedPiece,board):
+        print("Running clears check function")
         start = move[0]
         end = move[1]
         king = self.getKing()
         endContents = end.getPiece()
-        print("going into it:",selectedPiece,start,end)
+        #print("going into it:",selectedPiece,start,end)
         #simluate the move
         selectedPiece.setTile(end)
         start.setPiece(None)
         end.setPiece(selectedPiece)
-        print("simulate:",selectedPiece,start,end)
+        #print("simulate:",selectedPiece,start,end)
         #recalculate the new possible moves
      
         self.opponent.calculateAllPossibleAttacks()
@@ -240,7 +243,7 @@ class Player():
             start.setPiece(selectedPiece)
             end.setPiece(endContents)
         self.opponent.calculateAllPossibleAttacks()
-        print("restore:",selectedPiece,start,end)
+        #print("restore:",selectedPiece,start,end)
         return validMove
 
     
@@ -304,6 +307,7 @@ class Player():
             selectedPiece = packet[0]
             startTile = packet[1]
             endTile = packet[2]
+            print("Move:", startTile, "-->", endTile)
 
             #IF CHECKED#########
             while self.isChecked == True: #TODO:test (light testing worked)
@@ -323,6 +327,7 @@ class Player():
                     startTile = packet[1]
                     endTile = packet[2]
                     selectedPiece = startTile.getPiece()
+                    print("Move:", startTile, "-->", endTile)
                     #print("Running in the clearsCheck function",selectedPiece,startTile,endTile)
             ##########################################
 

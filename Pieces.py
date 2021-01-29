@@ -76,7 +76,7 @@ class Piece: #TODO: add move tracker
             #recalc enemies active pieces
             self.board.setActivePieces()
             player.getOpponent().getActivePieces()
-            
+
 
         
     def __str__(self):
@@ -145,42 +145,24 @@ class Pawn(Piece):
         validMove = True
         if self.team == "white":
             if start.getRow() - end.getRow() == -1 and end.isOccupied() == False and start.getCol() == end.getCol(): #valid single move no take
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
             elif start.getRow() - end.getRow() == -1 and end.isOccupied() == True and abs(start.getColNumber() - end.getColNumber()) == 1: #diagonal attack
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
                 #trash enemey piece right not its in lingo
             elif start.getRow() - end.getRow() == -2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0 and start.isStraightClearPath(end,self.board): #first move 2 spaces
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
 
             else:
                 print("illgal move")
                 validMove = False
         else:
             if start.getRow() - end.getRow() == 1 and end.isOccupied() == False and start.getCol() == end.getCol(): #valid single move
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
             elif start.getRow() - end.getRow() == 1 and end.isOccupied() == True and abs(start.getColNumber() - end.getColNumber()) == 1: #diagonalAttack
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
                 #trash enemey piece right not its in lingo
             elif start.getRow() - end.getRow() == 2 and end.isOccupied() == False and start.getCol() == end.getCol() and self.numberOfMoves == 0 and start.isStraightClearPath(end,self.board): #first move 2 spaces
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
 
             else:
                 print("illgal move")
@@ -188,20 +170,26 @@ class Pawn(Piece):
         #promotion
         if (self.getTeam() == "white" and self.getTile().getRow() == 8) or (self.getTeam() == "black" and self.getTile().getRow() == 1) and validMove:
             tile = self.getTile()
+            promotions = {"queen","rook","bishop","knight"}
             print("promotion available, select 'queen', 'rook', 'bishop', or 'knight'")
             promotion = input()
+            while promotion.lower() not in promotions:
+                print("invalid input, try again")
+                promotion = input()
             if promotion == "queen":     
-                tile.setPiece(Queen(tile,self.getTeam()))
+                tile.setPiece(Queen(tile,self.getTeam(),self.board))
             elif promotion == "rook":
-                tile.setPiece(Rook(tile, self.getTeam()))
+                tile.setPiece(Rook(tile, self.getTeam(),self.board))
             elif promotion == "bishop":
-                tile.setPiece(Bishop( tile, self.getTeam()))
+                tile.setPiece(Bishop( tile, self.getTeam(),self.board))
             elif promotion == "knight":
-                tile.setPiece(Knight(tile, self.getTeam()))
+                tile.setPiece(Knight(tile, self.getTeam(),self.board))
             newPiece = tile.getPiece()
             player = self.board.getPlayer(self.getTeam())
             player.updatePossibleMoves(self.board, newPiece)
             player.recalculateAllPossibleMoves(self.board)
+            player.addPromotedPiece(newPiece)
+            
 
         return validMove
 class Rook(Piece):
@@ -263,19 +251,13 @@ class Rook(Piece):
         enemyPiece = end.getPiece()
         if enemyPiece == None:
             if start.isStraightClearPath(end, self.board):
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
                 return True
             else:
                 print("illegal move")
                 return False
         elif start.isStraightClearPath(end,self.board) and enemyPiece.getTeam() != self.getTeam():
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
                 return True
         else:
             print("illegal move")
@@ -382,14 +364,10 @@ class Queen(Piece):
         enemyPiece = end.getPiece()
         if enemyPiece == None:
             if start.isDiagonalClearPath(end,self.board) or start.isStraightClearPath(end,self.board):
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
+                self.executeMove(end)
                 return True
         elif (start.isDiagonalClearPath(end,self.board) or start.isStraightClearPath(end,self.board)) and enemyPiece.getTeam() != self.getTeam():
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
+                self.executeMove(end)
                 return True
         elif (start.isDiagonalClearPath(end,self.board) or start.isStraightClearPath(end,self.board)) and enemyPiece.getTeam() == self.getTeam():
             print("Cant take your own piece")
@@ -481,19 +459,13 @@ class King(Piece):
         if end not in enemyThreats:
             if enemyPiece == None:
                 if end in self.getPossibleMoves():
-                    end.setPiece(self)
-                    self.setTile(tile)
-                    start.setPiece(None)
-                    self.numberOfMoves+=1
+                    self.executeMove(end)
                     return True
                 else:
                     print("illegal move")
                     return False
             elif end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam():
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
-                self.numberOfMoves+=1
+                self.executeMove(end)
                 return True
             else:
                 print("illegalMOve")
@@ -502,6 +474,7 @@ class King(Piece):
             print("Illegal move: cant move into check")
             return False
     def canLongCastle(self,player):
+        longRook = None
         tileMap = self.board.getTileMap()
         for piece in player.getPieceMoves():
             if piece.name =="Rook":
@@ -510,19 +483,20 @@ class King(Piece):
         if player.getTeam() == "white":
             b1, c1, d1 = tileMap['b1'],tileMap['c1'],tileMap['d1']
             if b1.getPiece() == None and c1.getPiece() == None and d1.getPiece() == None: 
-                if longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                if longRook != None and longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
                     enemyThreats = player.getOpponent().getAllPossibleMoves()
                     if d1 not in enemyThreats and c1 not in enemyThreats:
                         return True
         else:
             b8, c8, d8 = tileMap['b8'],tileMap['c8'],tileMap['d8']
             if b8.getPiece() == None and c8.getPiece() == None and d8.getPiece() == None: 
-                if longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                if longRook != None and longRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
                     enemyThreats = player.getOpponent().getAllPossibleMoves()
                     if d8 not in enemyThreats and c8 not in enemyThreats:
                         return True
         return False
     def canShortCastle(self,player):
+        shortRook = None
         tileMap = self.board.getTileMap()
         for piece in player.getPieceMoves():
             if piece.name =="Rook":
@@ -531,14 +505,14 @@ class King(Piece):
         if player.getTeam() == "white":
             g1, f1 = tileMap['g1'],tileMap['f1'],
             if g1.getPiece() == None and f1.getPiece() == None: 
-                if shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                if shortRook != None and shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
                     enemyThreats = player.getOpponent().getAllPossibleMoves()
                     if g1 not in enemyThreats and f1 not in enemyThreats:
                         return True
         else:
             g8, f8 = tileMap['g8'],tileMap['f8'],
             if g8.getPiece() == None and f8.getPiece() == None: 
-                if shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
+                if shortRook != None and shortRook.numberOfMoves == 0 and player.getKing().numberOfMoves == 0:
                     enemyThreats = player.getOpponent().getAllPossibleMoves()
                     if g8 not in enemyThreats and f8 not in enemyThreats:
                         return True
@@ -582,17 +556,13 @@ class Knight(Piece):
         enemyPiece = end.getPiece()
         if enemyPiece == None:
             if end in self.getPossibleMoves():
-                end.setPiece(self)
-                self.setTile(tile)
-                start.setPiece(None)
+                self.executeMove(end)
                 return True
             else:
                 print("illegal move")
                 return False
         elif end in self.getPossibleMoves() and enemyPiece.getTeam() != self.getTeam():
-            end.setPiece(self)
-            self.setTile(tile)
-            start.setPiece(None)
+            self.executeMove(end)
             return True
         else:
             print("illegalMOve")
@@ -658,17 +628,13 @@ class Bishop(Piece):
 
         if enemyPiece == None:
             if start.isDiagonalClearPath(end,self.board):
-                end.setPiece(self)
-                self.setTile(end)
-                start.setPiece(None)
+                self.executeMove(end)
                 return True
             else:
                 print("illegal move")
                 return False
         elif enemyPiece.getTeam() != self.getTeam() and start.isDiagonalClearPath(end,self.board):
-                end.setPiece(self)
-                self.setTile(end)
-                start.setPiece(None)
+                self.executeMove(end)
                 return True
         else:
             print("illegal move")
