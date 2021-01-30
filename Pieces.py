@@ -185,7 +185,8 @@ class Pawn(Piece):
             tile = self.getTile()
             promotions = {"queen","rook","bishop","knight"}
             print("promotion available, select 'queen', 'rook', 'bishop', or 'knight'")
-            promotion = input()
+            #promotion = input() #for human input
+            promotion = "queen"
             while promotion.lower() not in promotions:
                 print("invalid input, try again")
                 promotion = input()

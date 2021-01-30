@@ -283,12 +283,15 @@ class Player():
             if board.isDraw(self):
                 print("Draw!")
                 board.printLog()
-                input()
+                return False
+            if self.isStalemate():
+                print("Stalemate!")
+                return False
             if self.isChecked == True:
                 print(self.isCheckmate(board))
                 if self.isCheckmate(board) == True:
                     print("Checkmate")
-                    input()
+                    return False
 
             #Gather inputs##
 
@@ -338,8 +341,9 @@ class Player():
                 self.opponent.recalculateAllPossibleMoves(board)
                 self.isCheckingMove() 
                 self.numMoves +=1
+                #self.oppponent.calculateAllPossibleAttacks()
                 board.logMove(self,move,selectedPiece)
-                #input()
+                return True
                 
             else:
                 if isPinned:
@@ -358,7 +362,19 @@ class Player():
     def getNumberOfMoves(self):
         return self.numMoves
                 
-
+    def isStalemate(self):
+        king = self.getKing()
+        opponent = self.getOpponent()
+        threats= opponent.calculateAllPossibleAttacks()
+        for move in king.getPossibleMoves():
+            if move not in threats:
+                return False
+        for piece in self.getActivePieces():
+            possibleMoves = piece.getPossibleMoves()
+            for move in possibleMoves:
+                if not piece.isPinned(self,[piece.getTile(),move]):
+                    return False
+        return True
 
 
 

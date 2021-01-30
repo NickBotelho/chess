@@ -18,13 +18,17 @@ turns = 1
 gameRunning = True
 while gameRunning:
     print("Turn:",turns)
+
     print("p1 active pieces",p1.getStringListOfActivePieces())
     board.printBoard()
-    p1.computerTurn(board)
+    gameRunning = p1.computerTurn(board)
+    
+    if not gameRunning: 
+        break
     
     print("p2 active pieces",p2.getStringListOfActivePieces())
     board.printBoard()
-    p2.computerTurn(board)
+    gameRunning = p2.computerTurn(board)
     turns+=1
 
 
