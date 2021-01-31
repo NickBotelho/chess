@@ -31,4 +31,5 @@ while gameRunning:
     gameRunning = p2.computerTurn(board)
     turns+=1
 
+board.printLog()
 
